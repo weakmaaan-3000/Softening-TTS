@@ -32,19 +32,35 @@ jobs:
         run: |
           echo "=== Workspaces ==="
           find ios -maxdepth 1 -name "*.xcworkspace" -print
+
           echo "=== Projects ==="
           find ios -maxdepth 1 -name "*.xcodeproj" -print
-          echo "=== Schemes ==="
-          xcodebuild -list -workspace "$(find ios -maxdepth 1 -name "*.xcworkspace" -print -quit)"
+
+          WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" -print -quit)
+
+          echo "=== Xcode project information ==="
+          xcodebuild -list -workspace "$WORKSPACE"
 
       - name: Build unsigned app
         run: |
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" -print -quit)
-          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" \
-            | awk '/Schemes:/{flag=1; next} flag && NF {gsub(/^[ \t]+/, ""); print; exit}')
 
-          echo "Workspace: $WORKSPACE"
-          echo "Scheme: $SCHEME"
+          if [ -z "$WORKSPACE" ]; then
+            echo "ERROR: No xcworkspace found"
+            exit 1
+          fi
+
+          echo "Using workspace: $WORKSPACE"
+
+          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" |
+            awk '/Schemes:/{flag=1; next} flag && NF {gsub(/^[ \t]+/, ""); print; exit}')
+
+          if [ -z "$SCHEME" ]; then
+            echo "ERROR: No scheme found"
+            exit 1
+          fi
+
+          echo "Using scheme: $SCHEME"
 
           xcodebuild \
             -workspace "$WORKSPACE" \
@@ -54,12 +70,20 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
+
       - name: Package IPA
         run: |
           APP=$(find build/Build/Products/Release-iphoneos \
-            -maxdepth 1 -name "*.app" -print -quit)
+            -maxdepth 1 \
+            -name "*.app" \
+            -print -quit)
 
-          echo "App: $APP"
+          if [ -z "$APP" ]; then
+            echo "ERROR: No .app found"
+            exit 1
+          fi
+
+          echo "Using app: $APP"
 
           mkdir -p Payload
           cp -R "$APP" Payload/
