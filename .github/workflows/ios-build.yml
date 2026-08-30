@@ -52,13 +52,7 @@ jobs:
 
           echo "Using workspace: $WORKSPACE"
 
-          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" |
-            awk '/Schemes:/{flag=1; next} flag && NF {gsub(/^[ \t]+/, ""); print; exit}')
-
-          if [ -z "$SCHEME" ]; then
-            echo "ERROR: No scheme found"
-            exit 1
-          fi
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
 
           echo "Using scheme: $SCHEME"
 
@@ -70,7 +64,6 @@ jobs:
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
-
       - name: Package IPA
         run: |
           APP=$(find build/Build/Products/Release-iphoneos \
