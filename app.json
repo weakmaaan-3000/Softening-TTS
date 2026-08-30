@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "やわらか文章変換",
+    "slug": "weak-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "weakapp",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.dev.weakapp",
+      "buildNumber": "1",
+      "deploymentTarget": "16.4",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Windows PC上のllama.cppサーバーに接続して文章を変換するため、ローカルネットワークを使用します。",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        },
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "extra": {
+      "author": "dev"
+    }
+  }
+}
